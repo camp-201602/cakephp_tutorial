@@ -42,4 +42,43 @@ class PostsController extends AppController{
 			}
 		}
 	}
+
+	public function delete($id){
+		if ($this->request->is('get')) {
+			//例外処理を投げる。今回はURL直打ち(GETメソッド)では実行できないようにした
+            throw new MethodNotAllowedException();
+        }
+
+
+		if($this->Post->delete($id)){
+			//削除に成功した場合
+			$this->Flash->error('記事'.$id.'を削除しました');
+			return $this->redirect(array('action'=>'index'));
+		}
+	}
+
+	public function edit($id){
+		//既存のidを取得
+		$post=$this->Post->findById($id);
+		$this->Post->id=$id;//これがないと新規データを追加してしまう
+
+		//フォームからの送信をチェック
+		if($this->request->is(array('post','put'))){
+
+			//更新処理を試みる
+			if($this->Post->save($this->request->data)){
+				//更新に成功した場合
+				$this->Flash->success('記事'.$id.'を更新しました');
+				$this->redirect(array('action'=>'index'));
+			}else{
+				$this->Flash->error('記事を更新できませんでした');
+
+			}
+
+		}
+		if(!$this->request->data){
+			$this->request->data = $post;
+		}
+
+	}
 }
